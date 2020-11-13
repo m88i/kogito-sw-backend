@@ -12,7 +12,7 @@ RUN adduser -ms /bin/bash -d /home/kogito -u 1001 kogito
 USER kogito
 WORKDIR /home/kogito
 
-COPY kogito-sw-backend /usr/local/bin/kogito-sw-backend
+COPY bin/kogito-sw-backend /usr/local/bin/kogito-sw-backend
 #COPY bin/kogito /usr/local/bin
 #COPY bin/kubectl /usr/local/bin
 COPY --chown=kogito:kogito image/data/* /home/kogito/data

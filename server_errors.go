@@ -16,6 +16,9 @@ func (e serverError) Error() string {
 }
 
 func newServerError(message string, err error) *serverError {
+	if err == nil {
+		return &serverError{Message: message}
+	}
 	return &serverError{Message: message, Err: err.Error()}
 }
 
