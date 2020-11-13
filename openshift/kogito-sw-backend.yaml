@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kogito-sw-backend
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: null
+  name: kogito-sw-backend
+rules:
+  - apiGroups:
+      - ""
+      - app.kiegroup.org
+      - build.openshift.io
+      - route.openshift.io
+    resources:
+      - '*'
+    verbs:
+      - '*'
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - '*'
+  - apiGroups:
+      - eventing.knative.dev
+    resources:
+      - brokers
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kogito-sw-backend
+subjects:
+  - kind: ServiceAccount
+    name: kogito-sw-backend
+roleRef:
+  kind: Role
+  name: kogito-sw-backend
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kogito-sw-backend
+  labels:
+    app: kogito-sw-backend
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: kogito-sw-backend
+  template:
+    metadata:
+      labels:
+        name: kogito-sw-backend
+    spec:
+      serviceAccountName: kogito-sw-backend
+      containers:
+        - name: kogito-sw-backend
+          image: quay.io/m88i/kogito-sw-backend:latest
+          command:
+            - kogito-sw-backend
+          imagePullPolicy: Always
+          env:
+            - name: DEPLOY_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kogito-sw-backend
+  labels:
+    app: kogito-sw-backend
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+  selector:
+    app: kogito-sw-backend
+  type: ClusterIP
+  sessionAffinity: None
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: kogito-sw-backend
+  labels:
+    app: kogito-sw-backend
+spec:
+  to:
+    kind: Service
+    name: kogito-sw-backend
+    weight: 100
+  port:
+    targetPort: http
+  wildcardPolicy: None
