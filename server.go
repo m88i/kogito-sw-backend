@@ -79,7 +79,7 @@ func handleReady(writer http.ResponseWriter, request *http.Request) *serverError
 		return newServerError("Environment variable "+envKeyNamespace+" not defined", nil)
 	}
 	// verify kubectl
-	if err := execCmd("kubectl", "version"); err != nil {
+	if err := execCmd("oc", "version"); err != nil {
 		return newServerError("Failed to run kubectl", err)
 	}
 	// verify kogito

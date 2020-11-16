@@ -63,11 +63,11 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      name: kogito-sw-backend
+      app: kogito-sw-backend
   template:
     metadata:
       labels:
-        name: kogito-sw-backend
+        app: kogito-sw-backend
     spec:
       serviceAccountName: kogito-sw-backend
       containers:
@@ -85,6 +85,18 @@ spec:
             - name: http
               containerPort: 9000
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 9000
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9000
+              initialDelaySeconds: 3
+              periodSeconds: 3
 ---
 kind: Service
 apiVersion: v1

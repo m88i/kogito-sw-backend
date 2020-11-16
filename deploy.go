@@ -27,7 +27,7 @@ const (
 func deploy(workflow model.Workflow, workflowFile []byte) error {
 	namespace := os.Getenv(envKeyNamespace)
 	projectTemplate := regularProjectTemplatePath
-	if err := execCmd("kogito", "use-project", namespace); err != nil {
+	if err := execCmd("oc", "project", namespace); err != nil {
 		log.Error("Failed to set namespace", err)
 		return err
 	}
@@ -51,7 +51,7 @@ func deploy(workflow model.Workflow, workflowFile []byte) error {
 
 func deployEventsInfra(namespace string) error {
 	// apply the knative broker
-	if err := execCmd("kubectl", "apply", "-f", getDataPath()+knativeResourcesPath, "-n", namespace); err != nil {
+	if err := execCmd("oc", "apply", "-f", getDataPath()+knativeResourcesPath, "-n", namespace); err != nil {
 		log.Error("Failed create Knative Eventing broker", err)
 		return err
 	}
